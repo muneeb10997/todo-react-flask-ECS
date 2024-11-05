@@ -4,31 +4,30 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'frontend/**' 
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Configure AWS credentials
-        id: aws-creds
         uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: arn:aws:iam::354918400547:role/Github-repo-and-ECR
           aws-region: us-east-2
 
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v1
-
       - name: Build Docker image
         run: |
-          cd frontend
-          docker build -t 354918400547.dkr.ecr.us-east-2.amazonaws.com/frontend:latest .
+          docker build -t frontend ./frontend
 
-      - name: Push Docker image
+      - name: Login to ECR
         run: |
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 354918400547.dkr.ecr.us-east-2.amazonaws.com
+
+      - name: Tag and Push Docker image to ECR
+        run: |
+          docker tag frontend:latest 354918400547.dkr.ecr.us-east-2.amazonaws.com/frontend:latest
           docker push 354918400547.dkr.ecr.us-east-2.amazonaws.com/frontend:latest
