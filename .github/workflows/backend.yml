@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'backend/**'  # Only trigger on changes in the backend directory
+      - 'backend/**' 
 
 jobs:
   build:
