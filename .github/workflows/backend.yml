@@ -1,0 +1,34 @@
+name: Build and Push Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'  # Only trigger on changes in the backend directory
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        id: aws-creds
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::354918400547:role/Github-repo-and-ECR
+          aws-region: us-east-2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker image
+        run: |
+          cd backend
+          docker build -t 354918400547.dkr.ecr.us-east-2.amazonaws.com/backend:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push 354918400547.dkr.ecr.us-east-2.amazonaws.com/backend:latest
