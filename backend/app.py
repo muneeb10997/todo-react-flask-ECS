@@ -1,17 +1,18 @@
 from flask import Flask, jsonify, request
 from flask_mysqldb import MySQL
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 
 # CORS Configuration
 CORS(app)
 
-# MySQL configurations
-app.config['MYSQL_HOST'] = '10.0.2.89'  # Replace with your database host
-app.config['MYSQL_USER'] = 'todo_user'  # Replace with your database user
-app.config['MYSQL_PASSWORD'] = 'Muneeb@1122'  # Replace with your database password
-app.config['MYSQL_DB'] = 'todo_database'  # Use the newly created database
+# MySQL configurations using ENV variables
+app.config['MYSQL_HOST'] = os.getenv('DB_HOST')  
+app.config['MYSQL_USER'] = os.getenv('DB_USER')  
+app.config['MYSQL_PASSWORD'] = os.getenv('DB_PASSWORD') 
+app.config['MYSQL_DB'] = os.getenv('DB_NAME')  
 
 mysql = MySQL(app)
 
