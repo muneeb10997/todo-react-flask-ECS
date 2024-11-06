@@ -22,6 +22,7 @@ jobs:
           role-to-assume: arn:aws:iam::354918400547:role/ECR-github-role  # The IAM role to assume
           aws-region: us-east-2  # Adjust to your desired region
           audience: sts.amazonaws.com  # Ensure the audience is set correctly for OIDC
+          
       - name: Verify IAM role assumption
         run: |
           aws sts get-caller-identity
@@ -33,8 +34,9 @@ jobs:
         run: |
           docker build -t backend ./backend  # Path to your backend Dockerfile
 
-      - name: Login to ECR
+      - name: Login to Amazon ECR
         run: |
+          echo "Logging in to Amazon ECR..."
           aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 354918400547.dkr.ecr.us-east-2.amazonaws.com
 
       - name: Tag Docker image for ECR
