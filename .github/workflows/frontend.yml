@@ -1,33 +1,43 @@
-name: Build and Push Frontend
+name: Build and Push Frontend to ECR
 
 on:
   push:
     paths:
-      - 'frontend/**'
+      - 'frontend/**'  # Trigger this pipeline only on changes to frontend
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # Step 2: Configure AWS credentials
       - name: Configure AWS credentials
+        id: aws-creds
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: arn:aws:iam::354918400547:role/ECR-github-role
+          role-to-assume: arn:aws:iam::354918400547:role/ECR-github-role  # Role to assume for ECR access
           aws-region: us-east-2
 
+      # Step 3: Build Docker image (frontend)
       - name: Build Docker image
         run: |
-          docker build -t frontend ./frontend
+          docker build -t frontend ./frontend  # Build the frontend Docker image
 
-      - name: Login to ECR
+      # Step 4: Login to AWS ECR
+      - name: Login to AWS ECR
         run: |
           aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 354918400547.dkr.ecr.us-east-2.amazonaws.com
 
-      - name: Tag and Push Docker image to ECR
+      # Step 5: Tag Docker image
+      - name: Tag Docker image
         run: |
-          docker tag frontend:latest 354918400547.dkr.ecr.us-east-2.amazonaws.com/frontend:latest
-          docker push 354918400547.dkr.ecr.us-east-2.amazonaws.com/frontend:latest
+          docker tag frontend:latest 354918400547.dkr.ecr.us-east-2.amazonaws.com/frontend:latest  # Tag the image for ECR
+
+      # Step 6: Push Docker image to ECR
+      - name: Push Docker image to ECR
+        run: |
+          docker push 354918400547.dkr.ecr.us-east-2.amazonaws.com/frontend:latest  # Push the image to ECR
