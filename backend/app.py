@@ -5,7 +5,7 @@ import os
  
 app = Flask(__name__)
  
-# CORS Configuration
+# CORS Configuration 
 CORS(app) 
 
 # MySQL configurations using Enviromental variables 
