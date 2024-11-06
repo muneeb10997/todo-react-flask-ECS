@@ -3,7 +3,7 @@ from flask_mysqldb import MySQL
 from flask_cors import CORS
 import os 
  
-app = Flask(__name__)
+app = Flask(__name__) 
  
 # CORS Configuration 
 CORS(app) 
