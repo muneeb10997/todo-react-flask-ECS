@@ -16,7 +16,7 @@ app.config['MYSQL_DB'] = os.getenv('DB_NAME')
 
 mysql = MySQL(app)
 
-# Health check route
+# Health check route 
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({'status': 'healthy'}), 200
