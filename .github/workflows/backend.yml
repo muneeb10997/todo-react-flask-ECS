@@ -1,7 +1,7 @@
 name: Build and Push Backend
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
   push:
     paths:
       - 'backend/**'   # This triggers the workflow when changes are pushed to the 'backend' directory
