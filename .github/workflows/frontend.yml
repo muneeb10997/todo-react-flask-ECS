@@ -2,10 +2,8 @@ name: Build and Push Frontend
 
 on:
   push:
-    branches:
-      - main
     paths:
-      - 'frontend/**'  # Only trigger when files in the frontend directory change
+      - 'frontend/**'
 
 jobs:
   build:
