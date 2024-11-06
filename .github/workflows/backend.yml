@@ -43,7 +43,8 @@ jobs:
         run: |
           SHORT_HASH=$(echo ${{ github.sha }} | cut -c1-7)
           docker tag backend:latest 354918400547.dkr.ecr.us-east-2.amazonaws.com/backend:latest-${SHORT_HASH}
-
+        env:
+          GITHUB_SHA: ${SHORT_HASH}
       - name: Push Docker image to ECR
         run: |
           docker push 354918400547.dkr.ecr.us-east-2.amazonaws.com/backend:latest-${SHORT_HASH}
