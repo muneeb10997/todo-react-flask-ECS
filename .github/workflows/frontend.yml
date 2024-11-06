@@ -1,16 +1,22 @@
 name: Build and Push Frontend
 
 on:
+  workflow_dispatch:
   push:
     paths:
-      - 'frontend/**'   # This triggers the workflow when changes are pushed to the 'frontend' directory
+      - 'frontend/**'   
 
 jobs:
   build:
+    env:
+       GITHUB_SHA: ${{ github.sha }}
+       ECR_REGISTRY: 354918400547.dkr.ecr.us-east-2.amazonaws.com
+       ECR_REPOSITORY: frontend
+       
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write  # Grant write permission for OIDC to allow authentication
+      id-token: write  
 
     steps:
       - name: Checkout code
@@ -19,35 +25,26 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: arn:aws:iam::354918400547:role/ECR-github-role  # The IAM role to assume
-          aws-region: us-east-2  # Adjust to your desired region
-          audience: sts.amazonaws.com  # Ensure the audience is set correctly for OIDC
-     
-      - name: Verify IAM role assumption
-        run: |
-          aws sts get-caller-identity
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build Docker image
-        run: |
-          docker build -t frontend ./frontend  # Path to your frontend Dockerfile
-
+          role-to-assume: arn:aws:iam::354918400547:role/ECR-github-role  
+          aws-region: us-east-2  
+          audience: sts.amazonaws.com 
+          
       - name: Login to Amazon ECR
         run: |
           echo "Logging in to Amazon ECR..."
           aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 354918400547.dkr.ecr.us-east-2.amazonaws.com
+     
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Build, Tag, and Push Docker image to ECR
+        run: |
+          IMAGE_TAG=$(git rev-parse --short "$GITHUB_SHA")
+          
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./frontend
+          
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      - name: Tag Docker image for ECR
-        run: |
-          SHORT_HASH="${GITHUB_SHA:0:7}"
-          docker tag frontend:latest 354918400547.dkr.ecr.us-east-2.amazonaws.com/frontend:latest-${SHORT_HASH}
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-      - name: Push Docker image to ECR
-        run: |
-          SHORT_HASH="${GITHUB_SHA:0:7}"
-          docker push 354918400547.dkr.ecr.us-east-2.amazonaws.com/frontend:latest-${SHORT_HASH}
-        env:
-          GITHUB_SHA: ${{ github.sha }}
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REGISTRY
+        
+          docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
