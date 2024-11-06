@@ -1,7 +1,7 @@
 FROM python:3.10.12
  
 WORKDIR /app
-
+ 
 COPY . .
 
 RUN apt-get update && apt-get install -y \ 
