@@ -1,43 +1,39 @@
-name: Build and Push Backend to ECR
+name: Build and Push Backend
 
 on:
   push:
     paths:
-      - 'backend/**'  # Trigger this pipeline only on changes to backend
+      - 'backend/**'   # This triggers the workflow when changes are pushed to the 'backend' directory
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Configure AWS credentials
       - name: Configure AWS credentials
-        id: aws-creds
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: arn:aws:iam::354918400547:role/ECR-github-role  # Role to assume for ECR access
-          aws-region: us-east-2
+          role-to-assume: arn:aws:iam::354918400547:role/ECR-github-role  # Your IAM role
+          aws-region: us-east-2  # Adjust this to your desired region
 
-      # Step 3: Build Docker image (backend)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Build Docker image
         run: |
-          docker build -t backend ./backend  # Build the backend Docker image
+          docker build -t backend ./backend  # Path to your backend Dockerfile
 
-      # Step 4: Login to AWS ECR
-      - name: Login to AWS ECR
+      - name: Login to ECR
         run: |
           aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 354918400547.dkr.ecr.us-east-2.amazonaws.com
 
-      # Step 5: Tag Docker image
-      - name: Tag Docker image
+      - name: Tag Docker image for ECR
         run: |
-          docker tag backend:latest 354918400547.dkr.ecr.us-east-2.amazonaws.com/backend:latest  # Tag the image for ECR
+          docker tag backend:latest 354918400547.dkr.ecr.us-east-2.amazonaws.com/backend:latest
 
-      # Step 6: Push Docker image to ECR
       - name: Push Docker image to ECR
         run: |
-          docker push 354918400547.dkr.ecr.us-east-2.amazonaws.com/backend:latest  # Push the image to ECR
+          docker push 354918400547.dkr.ecr.us-east-2.amazonaws.com/backend:latest
