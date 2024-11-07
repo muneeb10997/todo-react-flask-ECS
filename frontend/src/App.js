@@ -4,7 +4,7 @@ function App() {
     const [todos, setTodos] = useState([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const backendUrl = 'http://localhost:5000/todos';  // Backend server URL through ALB
+    const backendUrl = 'ECS-load-balancer-2093982628.us-east-2.elb.amazonaws.com/todos';  // Backend server URL through ALB
 
     useEffect(() => {
         fetchTodos();
