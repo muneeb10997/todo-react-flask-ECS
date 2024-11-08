@@ -19,7 +19,7 @@ mysql = MySQL(app)
 # Health check route 
 @app.route('/health', methods=['GET'])
 def health_check():
-    return jsonify({'status': 'healthy hello '}), 200
+    return jsonify({'status': 'healthy heleelo '}), 200
 
 
 # Get all todos
