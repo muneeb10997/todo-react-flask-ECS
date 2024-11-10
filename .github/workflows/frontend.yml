@@ -48,7 +48,3 @@ jobs:
           aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REGISTRY
         
           docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
-          
-      - name: Force deployment
-        run: |
-         aws ecs update-service --cluster 3tier-application-cluster --service frontend-service --force-new-deployment
