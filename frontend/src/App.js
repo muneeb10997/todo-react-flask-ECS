@@ -8,7 +8,7 @@ function App() {
 
     useEffect(() => {
         fetchTodos();
-    }, []);
+    }, []); 
 
     const fetchTodos = async () => {
         const response = await fetch(backendUrl);
