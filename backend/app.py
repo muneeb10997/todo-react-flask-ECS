@@ -24,7 +24,7 @@ def health_check():
 
 # Get all todos
 @app.route('/todos', methods=['GET'])
-def get_todos():
+def get_todos(): 
     try:
         cur = mysql.connection.cursor()
         cur.execute("SELECT id, title, description FROM todos")  # Exclude 'completed' from the query
