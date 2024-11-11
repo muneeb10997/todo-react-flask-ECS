@@ -66,5 +66,17 @@ jobs:
 
       - name: wait for service stability check and if failed then roll back
         run: |
-          aws ecs wait services-stable --cluster ${{ env.Cluster_name }} --services ${{ env.service_name }} --region ${{ env.AWS-region }}
-          echo "Rollback!!!"
+          OUTPUT=$(aws ecs wait services-stable --cluster ${{ env.Cluster_name }} --services ${{ env.service_name }} --region ${{ env.AWS-region }} 2>&1)
+          if echo "$OUTPUT" | grep -q "Max attempts exceeded"; then
+            echo "Deployment failed with message: $OUTPUT"
+            echo "Assuming ECS rollback initiated..."
+
+            
+            echo "Deregistering failed task definition: $task_definition_arn"
+            aws ecs deregister-task-definition --task-definition $task_definition_arn --region ${{ env.AWS-region }}
+            echo "Failed task definition deregistered successfully."
+            
+            exit 1
+          else
+            echo "Deployment successful, service is stable."
+          fi
