@@ -51,7 +51,7 @@ jobs:
         
           docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
           
-      - name: Update ECS Task Definition
+      - name: Update ECS Task Definition and service
         run: |
           IMAGE_TAG=$(git rev-parse --short "$GITHUB_SHA")
           NEW_IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -62,4 +62,16 @@ jobs:
           registered_task_definition=$(aws ecs register-task-definition --region ${{ env.AWS-region }} --cli-input-json "$NEW_TASK_DEFINITION")
           task_definition_arn=$(echo $registered_task_definition | jq -r '.taskDefinition.taskDefinitionArn')
           aws ecs update-service --cluster ${{ env.Cluster_name }} --service ${{ env.service_name }} --task-definition $task_definition_arn --region ${{ env.AWS-region }}
-          
+
+      - name: wait for service stability check and if failed then 
+        run: |
+           aws ecs wait services-stable --cluster ${{ env.Cluster_name }} --services ${{ env.service_name }} --region ${{ env.AWS-region }}
+           
+           SERVICE_STATUS=$(aws ecs describe-services --cluster ${{ env.Cluster_name }} --services ${{ env.service_name }} --region ${{ env.AWS-region }} --query "services[0].deployments[0].status" --output text)
+
+           if [ "$SERVICE_STATUS" != "PRIMARY" ]; then
+            echo "Deployment failed"
+            exit 1
+           else
+             echo "Deployment successful, service is stable."
+           fi
