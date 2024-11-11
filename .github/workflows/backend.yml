@@ -55,7 +55,7 @@ jobs:
       - name: Update ECS Task Definition
         run: |
           # Fetch the current task definition
-          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition $SERVICE_NAME --region $AWS_region)
+          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition $SERVICE_NAME --region $AWS-region)
 
           # Create a new task definition with the updated image
           NEW_TASK_DEF=$(echo $TASK_DEFINITION | jq --arg IMAGE "$ECR_REGISTRY/$ECR_REPOSITORY:latest" \
