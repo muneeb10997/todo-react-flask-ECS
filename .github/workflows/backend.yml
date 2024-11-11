@@ -61,5 +61,5 @@ jobs:
           
           aws ecs register-task-definition --region ${{ env.AWS-region }} --cli-input-json "$NEW_TASK_DEFINITION" # register new task definition
          
-          aws ecs update-service --cluster ${{ env.Cluster_name }} --service ${{ env.service_name }} --task-definition $NEW_TASK_DEFINITION # update new task definiton in service 
+          aws ecs update-service --cluster ${{ env.Cluster_name }} --service ${{ env.service_name }} --task-definition $NEW_TASK_DEFINITION --region ${{ env.AWS-region }} # update new task definiton in service 
           
