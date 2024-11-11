@@ -67,3 +67,4 @@ jobs:
       - name: wait for service stability check and if failed then roll back
         run: |
           aws ecs wait services-stable --cluster ${{ env.Cluster_name }} --services ${{ env.service_name }} --region ${{ env.AWS-region }}
+          echo "Rollback!!!"
