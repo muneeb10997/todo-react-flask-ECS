@@ -12,6 +12,10 @@ jobs:
        GITHUB_SHA: ${{ github.sha }}
        ECR_REGISTRY: 354918400547.dkr.ecr.us-east-2.amazonaws.com
        ECR_REPOSITORY: backend
+       CLUSTER_NAME: 3tier-application-cluster
+       SERVICE_NAME: backend-service  
+       CONTAINER_NAME: backend-container
+       AWS-region: us-east-2
     runs-on: ubuntu-latest
 
     permissions:
@@ -25,7 +29,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: arn:aws:iam::354918400547:role/ECR-github-role  
-          aws-region: us-east-2  
+          aws-region: $AWS-region
           audience: sts.amazonaws.com  
           
       - name: Login to Amazon ECR
@@ -48,6 +52,15 @@ jobs:
         
           docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
           
-      - name: Force deployment
+      - name: Update ECS Task Definition
         run: |
-         aws ecs update-service --cluster 3tier-application-cluster --service backend-service --force-new-deployment
+          # Fetch the current task definition
+          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition $SERVICE_NAME --region $AWS_region)
+
+          # Create a new task definition with the updated image
+          NEW_TASK_DEF=$(echo $TASK_DEFINITION | jq --arg IMAGE "$ECR_REGISTRY/$ECR_REPOSITORY:latest" \
+          '.taskDefinition | .containerDefinitions[0].image=$IMAGE')
+
+          # Register the new task definition revision
+          echo "$NEW_TASK_DEF" > new-task-def.json
+          aws ecs register-task-definition --cli-input-json file://new-task-def.json --region $AWS-region
