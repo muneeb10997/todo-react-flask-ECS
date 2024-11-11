@@ -68,7 +68,7 @@ jobs:
            sleep 300
            SERVICE_STATUS=$(aws ecs describe-services --cluster ${{ env.Cluster_name }} --services ${{ env.service_name }} --region ${{ env.AWS-region }} --query "services[0].deployments[0].status" --output text)
 
-           if [ "$SERVICE_STATUS" != "Success" ]; then
+           if [ "$SERVICE_STATUS" != "PRIMARY" ]; then
             echo "Deployment failed Roll backed"
             exit 1
            else
