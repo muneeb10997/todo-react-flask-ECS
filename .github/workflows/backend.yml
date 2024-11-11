@@ -12,6 +12,8 @@ jobs:
        GITHUB_SHA: ${{ github.sha }}
        ECR_REGISTRY: 354918400547.dkr.ecr.us-east-2.amazonaws.com
        ECR_REPOSITORY: backend
+       Cluster_name: 3tier-application-cluster
+       service_name: backend-service
        AWS-region: us-east-2
     runs-on: ubuntu-latest
 
@@ -56,4 +58,8 @@ jobs:
           TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition "Backend-task-definition" --region ${{ env.AWS-region }})
           NEW_TASK_DEFINITION=$(echo $TASK_DEFINITION | jq --arg IMAGE "$NEW_IMAGE" \
            '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn) | del(.revision) | del(.status) | del(.requiresAttributes) | del(.compatibilities) | del(.registeredAt) | del(.registeredBy)')
-          aws ecs register-task-definition --region ${{ env.AWS-region }} --cli-input-json "$NEW_TASK_DEFINITION"
+          
+          aws ecs register-task-definition --region ${{ env.AWS-region }} --cli-input-json "$NEW_TASK_DEFINITION" # register new task definition
+         
+          aws ecs update-service --cluster $Cluster_name --service $service_name --task-definition $NEW_TASK_DEFINITION # update new task definiton in service 
+          
