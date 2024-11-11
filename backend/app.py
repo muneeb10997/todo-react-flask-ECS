@@ -6,7 +6,7 @@ import os
 app = Flask(__name__) 
    
 # CORS Configuration 
-CORS(app)     
+CORS(app)      
 
 # MySQL configurations using Enviromental variables   
 app.config['MYSQL_HOST'] = os.getenv('DB_HOST')   
