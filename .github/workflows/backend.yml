@@ -59,7 +59,7 @@ jobs:
           NEW_TASK_DEFINITION=$(echo $TASK_DEFINITION | jq --arg IMAGE "$NEW_IMAGE" \
            '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn) | del(.revision) | del(.status) | del(.requiresAttributes) | del(.compatibilities) | del(.registeredAt) | del(.registeredBy)')
           
-          registered-task-definition=$(aws ecs register-task-definition --region ${{ env.AWS-region }} --cli-input-json "$NEW_TASK_DEFINITION") # register new task definition
-          Task-definition-arn=$(echo $registered-task-definition | jq -r '.taskDefinition.taskDefinitionArn')
-          aws ecs update-service --cluster ${{ env.Cluster_name }} --service ${{ env.service_name }} --task-definition $Task-definition-arn --region ${{ env.AWS-region }} # update new task definiton in service 
+          registered_task_definition=$(aws ecs register-task-definition --region ${{ env.AWS-region }} --cli-input-json "$NEW_TASK_DEFINITION")
+          task_definition_arn=$(echo $registered_task_definition | jq -r '.taskDefinition.taskDefinitionArn')
+          aws ecs update-service --cluster ${{ env.Cluster_name }} --service ${{ env.service_name }} --task-definition $task_definition_arn --region ${{ env.AWS-region }}
           
