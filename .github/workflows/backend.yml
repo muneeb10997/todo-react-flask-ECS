@@ -51,8 +51,7 @@ jobs:
         
           docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
           
-      - name: regiter definition version is success but degistered if update service and rollback
-        run: |
+      - name: register new task-definition version and update-service 
           IMAGE_TAG=$(git rev-parse --short "$GITHUB_SHA")
           NEW_IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition "Backend-task-definition" --region ${{ env.AWS-region }})
@@ -61,9 +60,11 @@ jobs:
            '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn) | del(.revision) | del(.status) | del(.requiresAttributes) | del(.compatibilities) | del(.registeredAt) | del(.registeredBy)')
           
           registered_task_definition=$(aws ecs register-task-definition --region ${{ env.AWS-region }} --cli-input-json "$NEW_TASK_DEFINITION")
-          task_definition_arn=$(echo $registered_task_definition | jq -r '.taskDefinition.taskDefinitionArn')
+          export task_definition_arn=$(echo $registered_task_definition | jq -r '.taskDefinition.taskDefinitionArn')
           aws ecs update-service --cluster ${{ env.Cluster_name }} --service ${{ env.service_name }} --task-definition $task_definition_arn --region ${{ env.AWS-region }}
-
+          
+      - name: wait for service-stable if unstable then rollback and deregister task-definition-verison
+        run: |
           OUTPUT=$(aws ecs wait services-stable --cluster ${{ env.Cluster_name }} --services ${{ env.service_name }} --region ${{ env.AWS-region }} 2>&1 || true)
           if echo "$OUTPUT" | grep -q "Max attempts exceeded"; then
             echo "Deployment failed with message: $OUTPUT"
