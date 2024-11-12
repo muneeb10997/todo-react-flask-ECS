@@ -61,7 +61,8 @@ jobs:
            '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn) | del(.revision) | del(.status) | del(.requiresAttributes) | del(.compatibilities) | del(.registeredAt) | del(.registeredBy)')
           
           registered_task_definition=$(aws ecs register-task-definition --region ${{ env.AWS-region }} --cli-input-json "$NEW_TASK_DEFINITION")
-          export task_definition_arn=$(echo $registered_task_definition | jq -r '.taskDefinition.taskDefinitionArn')
+          task_definition_arn=$(echo $registered_task_definition | jq -r '.taskDefinition.taskDefinitionArn')
+          echo "task_definition_arn=$task_definition_arn" >> $GITHUB_ENV
           aws ecs update-service --cluster ${{ env.Cluster_name }} --service ${{ env.service_name }} --task-definition $task_definition_arn --region ${{ env.AWS-region }}
           
       - name: wait for service-stable if unstable then rollback and deregister task-definition-verison
