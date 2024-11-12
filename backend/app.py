@@ -14,7 +14,7 @@ app.config['MYSQL_USER'] = os.getenv('DB_USER')
 app.config['MYSQL_PASSWORD'] = os.getenv('DB_PASSWORD') 
 app.config['MYSQL_DB'] = os.getenv('DB_NAME') 
  
-mysql = MySQL(error ) 
+mysql = MySQL(app) 
 
 # Health check route 
 @app.route('/health', methods=['GET'])
